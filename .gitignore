@@ -1,0 +1,15 @@
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Gradle / Java
+.gradle/
+build/
+*.class
+
+# OS
+.DS_Store
+
+# Local state (never commit a real account's exported data)
+.wise-old-ai/
