@@ -1,0 +1,13 @@
+{
+  "weapon": { "id": 4151, "name": "Abyssal whip", "quantity": 1 },
+  "shield": { "id": 8850, "name": "Dragon defender", "quantity": 1 },
+  "helm": { "id": 10828, "name": "Helm of neitiznot", "quantity": 1 },
+  "body": { "id": 3140, "name": "Dragon chainbody", "quantity": 1 },
+  "legs": { "id": 4087, "name": "Dragon platelegs", "quantity": 1 },
+  "cape": { "id": 6570, "name": "Fire cape", "quantity": 1 },
+  "amulet": { "id": 1731, "name": "Amulet of glory", "quantity": 1 },
+  "ring": { "id": 6735, "name": "Berserker ring", "quantity": 1 },
+  "gloves": { "id": 7462, "name": "Barrows gloves", "quantity": 1 },
+  "boots": { "id": 11840, "name": "Dragon boots", "quantity": 1 },
+  "ammo": null
+}

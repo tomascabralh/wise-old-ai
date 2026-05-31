@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "id": 12695, "name": "Super combat potion(4)", "quantity": 2 },
+    { "id": 385, "name": "Shark", "quantity": 8 },
+    { "id": 2434, "name": "Prayer potion(4)", "quantity": 3 },
+    { "id": 560, "name": "Death rune", "quantity": 450 },
+    { "id": 565, "name": "Blood rune", "quantity": 300 },
+    { "id": 995, "name": "Coins", "quantity": 1850000 }
+  ]
+}

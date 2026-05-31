@@ -1,0 +1,14 @@
+{
+  "attack": { "real": 80, "boosted": 80, "xp": 2192818 },
+  "strength": { "real": 82, "boosted": 82, "xp": 2673649 },
+  "defence": { "real": 75, "boosted": 75, "xp": 1210421 },
+  "ranged": { "real": 85, "boosted": 85, "xp": 3258594 },
+  "prayer": { "real": 70, "boosted": 70, "xp": 737627 },
+  "magic": { "real": 82, "boosted": 82, "xp": 2673649 },
+  "hitpoints": { "real": 82, "boosted": 82, "xp": 2673649 },
+  "slayer": { "real": 78, "boosted": 78, "xp": 1798808 },
+  "agility": { "real": 70, "boosted": 70, "xp": 737627 },
+  "herblore": { "real": 72, "boosted": 72, "xp": 1026000 },
+  "farming": { "real": 75, "boosted": 75, "xp": 1210421 },
+  "construction": { "real": 65, "boosted": 65, "xp": 449428 }
+}
