@@ -24,6 +24,11 @@ RuneLite client ─(client thread)─► Wise Old AI plugin
 The plugin and the server are fully independent. They share only the JSON-on-disk
 contract defined once in [`shared/schemas`](shared/schemas) as Zod schemas.
 
+The plugin adds a **sidebar panel** (the owl icon) showing export status: whether
+it's exporting, for which account, when it last changed, how many state files are
+written, and buttons to open or copy the state folder. The panel is status only —
+the actual advice happens in your MCP client, not in RuneLite.
+
 ## Repository layout
 
 | Path | What |

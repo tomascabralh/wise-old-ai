@@ -26,12 +26,17 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.api.events.GameTick;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.ImageUtil;
+import java.awt.image.BufferedImage;
 
 @Slf4j
 @PluginDescriptor(
@@ -50,12 +55,19 @@ public class WiseOldAiPlugin extends Plugin
 	@Inject
 	private WiseOldAiConfig config;
 
+	@Inject
+	private ClientToolbar clientToolbar;
+
 	// serializeNulls so empty equipment slots are written as `null`, not omitted.
 	private final Gson gson = new GsonBuilder().serializeNulls().create();
 	private final Map<String, String> updatedAt = new LinkedHashMap<>();
 
 	private StateExporter exporter;
+	private WiseOldAiPanel panel;
+	private NavigationButton navButton;
+	private Path stateDir;
 	private long lastWriteMs;
+	private long lastChangeMs;
 
 	@Provides
 	WiseOldAiConfig provideConfig(ConfigManager configManager)
@@ -66,18 +78,45 @@ public class WiseOldAiPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		Path dir = resolveStateDir();
-		exporter = new StateExporter(dir);
-		log.info("Wise Old AI exporting state to {}", dir);
+		stateDir = resolveStateDir();
+		exporter = new StateExporter(stateDir);
+
+		panel = new WiseOldAiPanel();
+		panel.update(false, null, 0L, 0, stateDir.toString());
+		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "icon.png");
+		navButton = NavigationButton.builder()
+			.tooltip("Wise Old AI")
+			.icon(icon)
+			.priority(7)
+			.panel(panel)
+			.build();
+		clientToolbar.addNavigation(navButton);
+
+		log.info("Wise Old AI exporting state to {}", stateDir);
 	}
 
 	@Override
 	protected void shutDown()
 	{
+		if (navButton != null)
+		{
+			clientToolbar.removeNavigation(navButton);
+			navButton = null;
+		}
 		if (exporter != null)
 		{
 			exporter.shutdown();
 			exporter = null;
+		}
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		if (panel != null && event.getGameState() != GameState.LOGGED_IN)
+		{
+			panel.update(false, null, lastChangeMs, updatedAt.size(),
+				stateDir == null ? "" : stateDir.toString());
 		}
 	}
 
@@ -111,6 +150,12 @@ public class WiseOldAiPlugin extends Plugin
 		if (changed)
 		{
 			exportSlice("metadata", buildMetadata());
+			lastChangeMs = now;
+		}
+
+		if (panel != null)
+		{
+			panel.update(true, local.getName(), lastChangeMs, updatedAt.size(), stateDir.toString());
 		}
 	}
 
