@@ -74,6 +74,9 @@ Log in to a character and it writes to `~/.wise-old-ai/state/` every game tick
 [RuneLite Plugin Hub](https://github.com/runelite/plugin-hub) for eventual
 distribution.
 
+> Using a **Jagex account**? The dev client's login screen only accepts legacy
+> accounts — see [`docs/jagex-account-dev-login.md`](docs/jagex-account-dev-login.md).
+
 ### 3. Connect Claude Desktop
 See [`docs/claude-desktop-setup.md`](docs/claude-desktop-setup.md). In short, add
 the server to `claude_desktop_config.json` pointing at `mcp-server/dist/index.js`.
