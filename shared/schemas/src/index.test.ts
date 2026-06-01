@@ -45,4 +45,12 @@ describe("schemas", () => {
     };
     expect(EquipmentStateSchema.parse(eq).weapon?.name).toBe("Abyssal whip");
   });
+
+  it("treats omitted equipment slots as null (producer dropped null fields)", () => {
+    const partial = { helm: { id: 1, name: "Helm", quantity: 1 } };
+    const parsed = EquipmentStateSchema.parse(partial);
+    expect(parsed.weapon).toBeNull();
+    expect(parsed.ammo).toBeNull();
+    expect(parsed.helm?.name).toBe("Helm");
+  });
 });

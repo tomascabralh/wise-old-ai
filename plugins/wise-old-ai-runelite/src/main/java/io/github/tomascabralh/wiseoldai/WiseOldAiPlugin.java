@@ -1,6 +1,7 @@
 package io.github.tomascabralh.wiseoldai;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Provides;
 import io.github.tomascabralh.wiseoldai.model.EquipmentState;
 import io.github.tomascabralh.wiseoldai.model.InventoryItem;
@@ -49,7 +50,8 @@ public class WiseOldAiPlugin extends Plugin
 	@Inject
 	private WiseOldAiConfig config;
 
-	private final Gson gson = new Gson();
+	// serializeNulls so empty equipment slots are written as `null`, not omitted.
+	private final Gson gson = new GsonBuilder().serializeNulls().create();
 	private final Map<String, String> updatedAt = new LinkedHashMap<>();
 
 	private StateExporter exporter;

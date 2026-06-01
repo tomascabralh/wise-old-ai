@@ -27,8 +27,12 @@ export const InventoryItemSchema = z.object({
 });
 export const InventoryStateSchema = z.object({ items: z.array(InventoryItemSchema) });
 
-/** An equipment slot is either a worn item or null (empty). */
-export const EquipmentSlotSchema = InventoryItemSchema.nullable();
+/**
+ * An equipment slot is either a worn item or null (empty). Defaults to null so a
+ * producer that omits empty slots (e.g. a JSON serializer that drops null fields)
+ * still validates.
+ */
+export const EquipmentSlotSchema = InventoryItemSchema.nullable().default(null);
 export const EquipmentStateSchema = z.object({
   weapon: EquipmentSlotSchema,
   shield: EquipmentSlotSchema,
