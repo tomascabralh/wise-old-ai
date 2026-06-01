@@ -110,15 +110,21 @@ export const tools: Record<string, Tool> = {
     },
   },
   get_current_activity: {
-    description: "The player's current activity — currently the Slayer task (amount remaining, points, streak).",
+    description: "The player's current activity — currently the Slayer task (monster, amount remaining, points, streak).",
     run: async () => {
       const r = await readSlice("activities", ActivitiesStateSchema);
       if (!r.ok) return text(r.error);
       const s = r.data.slayer;
-      const task = s.taskAmountRemaining > 0
-        ? `${s.taskAmountRemaining} remaining${s.bossTask ? " (boss task)" : ""}`
-        : "no active task";
-      return text(`Slayer task: ${task}\nSlayer points: ${s.points}, streak: ${s.streak}\n(Note: the task's monster name isn't tracked yet.)`);
+      if (s.taskAmountRemaining <= 0) {
+        return text(`Slayer task: no active task\nSlayer points: ${s.points}, streak: ${s.streak}`);
+      }
+      const monster = s.taskName ?? "unknown monster";
+      const where = s.taskLocation ? ` (${s.taskLocation})` : "";
+      const note = s.taskName ? "" : "\n(Monster name unknown — check your task in-game with the plugin running to capture it.)";
+      return text(
+        `Slayer task: ${monster}${where} — ${s.taskAmountRemaining} remaining${s.bossTask ? " (boss task)" : ""}\n` +
+        `Slayer points: ${s.points}, streak: ${s.streak}${note}`,
+      );
     },
   },
   push_advice: {

@@ -7,6 +7,8 @@ public class ActivitiesState
 
 	public static class Slayer
 	{
+		public String taskName;
+		public String taskLocation;
 		public int taskAmountRemaining;
 		public int points;
 		public int streak;

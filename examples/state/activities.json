@@ -1,5 +1,7 @@
 {
   "slayer": {
+    "taskName": "Aberrant spectres",
+    "taskLocation": "Catacombs of Kourend",
     "taskAmountRemaining": 112,
     "points": 1450,
     "streak": 87,

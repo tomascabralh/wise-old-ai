@@ -66,11 +66,19 @@ describe("tools", () => {
     expect(out).toContain("2 / 4");
   });
 
-  it("get_current_activity reports the slayer task", async () => {
-    await write("activities.json", { slayer: { taskAmountRemaining: 87, points: 1500, streak: 120, bossTask: false } });
+  it("get_current_activity reports the slayer task with its monster name", async () => {
+    await write("activities.json", { slayer: { taskName: "Aberrant spectres", taskLocation: "Catacombs of Kourend", taskAmountRemaining: 87, points: 1500, streak: 120, bossTask: false } });
     const out = (await tools.get_current_activity.run()).content[0].text;
+    expect(out).toContain("Aberrant spectres");
+    expect(out).toContain("Catacombs of Kourend");
     expect(out).toContain("87 remaining");
     expect(out).toContain("streak: 120");
+  });
+
+  it("get_current_activity flags an unknown monster name", async () => {
+    await write("activities.json", { slayer: { taskAmountRemaining: 50, points: 1, streak: 1, bossTask: false } });
+    const out = (await tools.get_current_activity.run()).content[0].text;
+    expect(out).toMatch(/unknown monster/i);
   });
 
   it("push_advice writes advice.json and get_advice reads it back", async () => {

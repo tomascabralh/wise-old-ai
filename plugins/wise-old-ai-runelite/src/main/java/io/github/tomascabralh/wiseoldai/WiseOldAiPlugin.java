@@ -35,6 +35,7 @@ import net.runelite.api.Skill;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
@@ -67,6 +68,9 @@ public class WiseOldAiPlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
+	@Inject
+	private ConfigManager configManager;
+
 	// serializeNulls so empty equipment slots are written as `null`, not omitted.
 	private final Gson gson = new GsonBuilder().serializeNulls().create();
 	private final Map<String, String> updatedAt = new LinkedHashMap<>();
@@ -78,6 +82,8 @@ public class WiseOldAiPlugin extends Plugin
 	private long lastWriteMs;
 	private long lastChangeMs;
 	private long lastAdviceMtime;
+	private String slayerTaskName;
+	private String slayerTaskLocation;
 
 	@Provides
 	WiseOldAiConfig provideConfig(ConfigManager configManager)
@@ -90,6 +96,10 @@ public class WiseOldAiPlugin extends Plugin
 	{
 		stateDir = resolveStateDir();
 		exporter = new StateExporter(stateDir);
+
+		// Restore the last-known Slayer task name (captured from chat) across restarts.
+		slayerTaskName = configManager.getConfiguration("wiseoldai", "slayerTaskName");
+		slayerTaskLocation = configManager.getConfiguration("wiseoldai", "slayerTaskLocation");
 
 		panel = new WiseOldAiPanel();
 		panel.update(false, null, 0L, 0, stateDir.toString());
@@ -118,6 +128,71 @@ public class WiseOldAiPlugin extends Plugin
 			exporter.shutdown();
 			exporter = null;
 		}
+	}
+
+	// Slayer assignment / check messages, e.g. "You're assigned to kill aberrant
+	// spectres in the Catacombs of Kourend; only 134 more to go."
+	private static final String[] TASK_PREFIXES = {
+		"you're assigned to kill ",
+		"you are assigned to kill ",
+		"you're currently assigned to kill ",
+		"you are currently assigned to kill ",
+		"your new task is to kill ",
+	};
+
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		String[] task = parseSlayerAssignment(event.getMessage());
+		if (task == null)
+		{
+			return;
+		}
+		slayerTaskName = task[0];
+		slayerTaskLocation = task[1];
+		configManager.setConfiguration("wiseoldai", "slayerTaskName", task[0]);
+		configManager.setConfiguration("wiseoldai", "slayerTaskLocation", task[1] == null ? "" : task[1]);
+	}
+
+	/**
+	 * Parse a Slayer assignment/check chat line into {monster, location}, or null if it
+	 * isn't one. Location is null for non-Konar tasks. Package-visible for tests.
+	 */
+	static String[] parseSlayerAssignment(String message)
+	{
+		String lower = message.toLowerCase();
+		int start = -1;
+		for (String prefix : TASK_PREFIXES)
+		{
+			int i = lower.indexOf(prefix);
+			if (i >= 0)
+			{
+				start = i + prefix.length();
+				break;
+			}
+		}
+		if (start < 0)
+		{
+			return null;
+		}
+
+		// Trim at the first sentence/clause boundary, then strip a leading amount.
+		String rest = message.substring(start).split("[;.!]")[0].trim();
+		rest = rest.replaceFirst("^\\d[\\d,]*\\s+", "");
+
+		String name = rest;
+		String location = null;
+		int inIdx = rest.toLowerCase().indexOf(" in ");
+		if (inIdx > 0)
+		{
+			name = rest.substring(0, inIdx).trim();
+			location = rest.substring(inIdx + 4).replaceFirst("^(?i)the\\s+", "").trim();
+			if (location.isEmpty())
+			{
+				location = null;
+			}
+		}
+		return name.isEmpty() ? null : new String[]{name, location};
 	}
 
 	@Subscribe
@@ -387,10 +462,14 @@ public class WiseOldAiPlugin extends Plugin
 	private ActivitiesState buildActivities()
 	{
 		ActivitiesState a = new ActivitiesState();
-		a.slayer.taskAmountRemaining = client.getVarpValue(VarPlayer.SLAYER_TASK_SIZE);
+		int remaining = client.getVarpValue(VarPlayer.SLAYER_TASK_SIZE);
+		a.slayer.taskAmountRemaining = remaining;
 		a.slayer.points = client.getVarbitValue(Varbits.SLAYER_POINTS);
 		a.slayer.streak = client.getVarbitValue(Varbits.SLAYER_TASK_STREAK);
 		a.slayer.bossTask = client.getVarbitValue(Varbits.SLAYER_TASK_BOSS) > 0;
+		// Name comes from chat (persisted); only meaningful while a task is active.
+		a.slayer.taskName = remaining > 0 ? emptyToNull(slayerTaskName) : null;
+		a.slayer.taskLocation = remaining > 0 ? emptyToNull(slayerTaskLocation) : null;
 		return a;
 	}
 
@@ -400,6 +479,11 @@ public class WiseOldAiPlugin extends Plugin
 		m.schemaVersion = 1;
 		m.updatedAt = new LinkedHashMap<>(updatedAt);
 		return m;
+	}
+
+	private static String emptyToNull(String s)
+	{
+		return (s == null || s.isEmpty()) ? null : s;
 	}
 
 	private Path resolveStateDir()

@@ -74,6 +74,10 @@ export const DiariesStateSchema = z.record(z.string(), DiaryTiersSchema);
 /** Current activity. For now this is the Slayer task (the monster name isn't tracked yet). */
 export const ActivitiesStateSchema = z.object({
   slayer: z.object({
+    // taskName/taskLocation come from the Slayer assignment chat message; null until
+    // captured (e.g. assigned before the plugin started) or when there's no task.
+    taskName: z.string().nullable().default(null),
+    taskLocation: z.string().nullable().default(null),
     taskAmountRemaining: z.number().int(),
     points: z.number().int(),
     streak: z.number().int(),
