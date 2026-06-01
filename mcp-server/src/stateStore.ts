@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { ZodType } from "zod";
@@ -34,4 +34,14 @@ export async function readSlice<T>(
   } catch (e) {
     return { ok: false, error: `Could not read ${slice}.json: ${(e as Error).message}` };
   }
+}
+
+/** Atomically write a slice (tmp file + rename) so a reader never sees partial JSON. */
+export async function writeSlice(slice: string, data: unknown): Promise<void> {
+  const dir = stateDir();
+  await mkdir(dir, { recursive: true });
+  const tmp = join(dir, `${slice}.json.tmp`);
+  const target = join(dir, `${slice}.json`);
+  await writeFile(tmp, JSON.stringify(data, null, 2), "utf8");
+  await rename(tmp, target);
 }

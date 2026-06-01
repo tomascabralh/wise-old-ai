@@ -6,7 +6,10 @@ import { tools } from "./tools.js";
 const server = new McpServer({ name: "wise-old-ai", version: "0.1.0" });
 
 for (const [name, tool] of Object.entries(tools)) {
-  server.registerTool(name, { description: tool.description }, async () => tool.run());
+  const config = tool.inputSchema
+    ? { description: tool.description, inputSchema: tool.inputSchema }
+    : { description: tool.description };
+  server.registerTool(name, config as any, async (args: any) => tool.run(args));
 }
 
 await server.connect(new StdioServerTransport());

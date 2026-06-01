@@ -54,6 +54,16 @@ export const LocationStateSchema = z.object({
   regionId: z.number().int(),
 });
 
+/**
+ * A piece of advice posted by the MCP client (e.g. Claude) for display on the
+ * in-game panel. Written by the server, read by the plugin — the reverse channel.
+ */
+export const AdviceSchema = z.object({
+  title: z.string().optional(),
+  body: z.string(),
+  createdAt: z.string(), // ISO-8601
+});
+
 /** Written every export so consumers can report data staleness. */
 export const MetadataSchema = z.object({
   schemaVersion: z.literal(1),
@@ -67,4 +77,5 @@ export type InventoryItem = z.infer<typeof InventoryItemSchema>;
 export type InventoryState = z.infer<typeof InventoryStateSchema>;
 export type EquipmentState = z.infer<typeof EquipmentStateSchema>;
 export type LocationState = z.infer<typeof LocationStateSchema>;
+export type Advice = z.infer<typeof AdviceSchema>;
 export type Metadata = z.infer<typeof MetadataSchema>;

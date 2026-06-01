@@ -1,10 +1,12 @@
-import { readSlice } from "./stateStore.js";
+import { z, type ZodTypeAny } from "zod";
+import { readSlice, writeSlice } from "./stateStore.js";
 import {
   PlayerStateSchema,
   SkillsStateSchema,
   InventoryStateSchema,
   EquipmentStateSchema,
   LocationStateSchema,
+  AdviceSchema,
 } from "@wise-old-ai/schemas";
 
 export type ToolResult = { content: { type: "text"; text: string }[] };
@@ -12,7 +14,9 @@ const text = (s: string): ToolResult => ({ content: [{ type: "text", text: s }] 
 
 export interface Tool {
   description: string;
-  run: () => Promise<ToolResult>;
+  /** Zod raw shape for tools that take arguments; omitted for no-arg tools. */
+  inputSchema?: Record<string, ZodTypeAny>;
+  run: (args?: any) => Promise<ToolResult>;
 }
 
 export const tools: Record<string, Tool> = {
@@ -68,6 +72,28 @@ export const tools: Record<string, Tool> = {
     run: async () => {
       const r = await readSlice("location", LocationStateSchema);
       return text(r.ok ? JSON.stringify(r.data, null, 2) : r.error);
+    },
+  },
+  push_advice: {
+    description:
+      "Post a short piece of advice to the player's in-game Wise Old AI panel (e.g. what to train or do next). Shows in RuneLite until replaced.",
+    inputSchema: {
+      body: z.string().min(1).describe("The advice text to show in the panel."),
+      title: z.string().optional().describe("Optional short heading, e.g. \"Next goal\"."),
+    },
+    run: async (args: { body: string; title?: string }) => {
+      const advice = { title: args.title, body: args.body, createdAt: new Date().toISOString() };
+      await writeSlice("advice", advice);
+      return text(`Posted advice to the in-game panel${args.title ? ` ("${args.title}")` : ""}.`);
+    },
+  },
+  get_advice: {
+    description: "Read the advice currently shown on the player's in-game panel.",
+    run: async () => {
+      const r = await readSlice("advice", AdviceSchema);
+      if (!r.ok) return text("No advice has been posted to the panel yet.");
+      const heading = r.data.title ? `${r.data.title}\n\n` : "";
+      return text(`${heading}${r.data.body}\n\n(posted ${r.data.createdAt})`);
     },
   },
 };

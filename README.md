@@ -24,10 +24,12 @@ RuneLite client ─(client thread)─► Wise Old AI plugin
 The plugin and the server are fully independent. They share only the JSON-on-disk
 contract defined once in [`shared/schemas`](shared/schemas) as Zod schemas.
 
-The plugin adds a **sidebar panel** (the owl icon) showing export status: whether
+The plugin adds a **sidebar panel** (the owl icon) showing export status — whether
 it's exporting, for which account, when it last changed, how many state files are
-written, and buttons to open or copy the state folder. The panel is status only —
-the actual advice happens in your MCP client, not in RuneLite.
+written, and buttons to open or copy the state folder. It also has an **Advice**
+section: when your MCP client (e.g. Claude) calls `push_advice`, the text appears
+here in-game. The model still runs in the client — the panel just displays what it
+sends, so this stays advisory, never automation.
 
 ## Repository layout
 
@@ -50,6 +52,8 @@ the actual advice happens in your MCP client, not in RuneLite.
 | `get_inventory` | inventory items (`{id, name, quantity}`) |
 | `get_equipment` | worn gear by slot |
 | `get_location` | world position (x, y, plane, region) |
+| `push_advice` | post advice (`{body, title?}`) to the in-game panel |
+| `get_advice` | read the advice currently shown in-game |
 
 ## Quick start
 
@@ -122,6 +126,8 @@ independently. The plugin only writes a slice when its content actually changes.
   `get_current_activity`).
 - **Milestone 3:** bank support + valuation, progression analysis.
 - **Milestone 4:** screenshots + multimodal coaching.
+- **Advice channel (done):** `push_advice` / `get_advice` surface the client's
+  advice on the in-game panel.
 - **Context engine:** a derived layer (account stage, combat readiness,
   recommended goals) on top of raw state.
 

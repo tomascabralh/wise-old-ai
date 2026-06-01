@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { tools } from "./tools";
@@ -46,5 +46,22 @@ describe("tools", () => {
     });
     const out = await tools.get_equipment.run();
     expect(out.content[0].text).toContain("Abyssal whip");
+  });
+
+  it("push_advice writes advice.json and get_advice reads it back", async () => {
+    await tools.push_advice.run({ body: "Train Slayer next", title: "Next goal" });
+    const raw = JSON.parse(await readFile(join(dir, "advice.json"), "utf8"));
+    expect(raw.body).toBe("Train Slayer next");
+    expect(raw.title).toBe("Next goal");
+    expect(typeof raw.createdAt).toBe("string");
+
+    const out = await tools.get_advice.run();
+    expect(out.content[0].text).toContain("Train Slayer next");
+    expect(out.content[0].text).toContain("Next goal");
+  });
+
+  it("get_advice reports when nothing posted", async () => {
+    const out = await tools.get_advice.run();
+    expect(out.content[0].text).toMatch(/no advice/i);
   });
 });

@@ -17,6 +17,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
@@ -38,6 +40,10 @@ class WiseOldAiPanel extends PluginPanel
 	private final JLabel dir = new JLabel();
 	private final JButton openButton = new JButton("Open state folder");
 	private final JButton copyButton = new JButton("Copy folder path");
+
+	private final JLabel adviceTitle = new JLabel();
+	private final JTextArea adviceBody = new JTextArea();
+	private final JLabel adviceTime = new JLabel();
 
 	private String stateDir = "";
 
@@ -77,6 +83,31 @@ class WiseOldAiPanel extends PluginPanel
 		buttons.add(openButton);
 		buttons.add(copyButton);
 
+		JSeparator sep = new JSeparator();
+		sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+		sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
+
+		JLabel adviceHeader = new JLabel("Advice");
+		adviceHeader.setFont(adviceHeader.getFont().deriveFont(Font.BOLD, 13f));
+		adviceHeader.setForeground(Color.WHITE);
+		adviceHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+		adviceHeader.setBorder(BorderFactory.createEmptyBorder(8, 0, 4, 0));
+
+		adviceTitle.setForeground(Color.WHITE);
+		adviceTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+		adviceBody.setEditable(false);
+		adviceBody.setLineWrap(true);
+		adviceBody.setWrapStyleWord(true);
+		adviceBody.setOpaque(false);
+		adviceBody.setForeground(ColorScheme.TEXT_COLOR);
+		adviceBody.setFont(adviceBody.getFont().deriveFont(12f));
+		adviceBody.setAlignmentX(Component.LEFT_ALIGNMENT);
+		adviceBody.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+
+		adviceTime.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		adviceTime.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 		body.add(title);
 		body.add(subtitle);
 		body.add(status);
@@ -85,10 +116,49 @@ class WiseOldAiPanel extends PluginPanel
 		body.add(slices);
 		body.add(dir);
 		body.add(buttons);
+		body.add(sep);
+		body.add(adviceHeader);
+		body.add(adviceTitle);
+		body.add(adviceBody);
+		body.add(adviceTime);
 
 		add(body, BorderLayout.NORTH);
 
 		update(false, null, 0L, 0, "");
+		clearAdvice();
+	}
+
+	/** Show advice posted by the MCP client. Marshals onto the EDT. */
+	void setAdvice(String title, String bodyText, long createdAtMs)
+	{
+		javax.swing.SwingUtilities.invokeLater(() ->
+		{
+			if (bodyText == null || bodyText.isEmpty())
+			{
+				clearAdviceImpl();
+				return;
+			}
+			adviceTitle.setText(title == null || title.isEmpty() ? " " : title);
+			adviceTitle.setVisible(title != null && !title.isEmpty());
+			adviceBody.setForeground(ColorScheme.TEXT_COLOR);
+			adviceBody.setText(bodyText);
+			adviceTime.setText(createdAtMs > 0 ? "posted " + TIME.format(new Date(createdAtMs)) : "");
+			adviceTime.setVisible(createdAtMs > 0);
+		});
+	}
+
+	/** Reset the advice section to its empty placeholder. */
+	void clearAdvice()
+	{
+		javax.swing.SwingUtilities.invokeLater(this::clearAdviceImpl);
+	}
+
+	private void clearAdviceImpl()
+	{
+		adviceTitle.setVisible(false);
+		adviceBody.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		adviceBody.setText("No advice yet — ask your MCP client (e.g. Claude) to post some, and it will appear here.");
+		adviceTime.setVisible(false);
 	}
 
 	/** Refresh the panel. Safe to call from any thread — marshals onto the EDT. */

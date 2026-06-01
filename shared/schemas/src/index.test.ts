@@ -5,6 +5,7 @@ import {
   LocationStateSchema,
   EquipmentStateSchema,
   InventoryStateSchema,
+  AdviceSchema,
 } from "./index";
 
 describe("schemas", () => {
@@ -44,6 +45,12 @@ describe("schemas", () => {
       amulet: null, ring: null, gloves: null, boots: null, ammo: null,
     };
     expect(EquipmentStateSchema.parse(eq).weapon?.name).toBe("Abyssal whip");
+  });
+
+  it("accepts advice with and without a title, rejects empty", () => {
+    expect(AdviceSchema.parse({ body: "Train Slayer", createdAt: "2026-06-01T00:00:00Z" }).body).toBe("Train Slayer");
+    expect(AdviceSchema.parse({ title: "Goal", body: "x", createdAt: "2026-06-01T00:00:00Z" }).title).toBe("Goal");
+    expect(() => AdviceSchema.parse({ createdAt: "2026-06-01T00:00:00Z" })).toThrow();
   });
 
   it("treats omitted equipment slots as null (producer dropped null fields)", () => {

@@ -3,6 +3,7 @@ package io.github.tomascabralh.wiseoldai;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Provides;
+import io.github.tomascabralh.wiseoldai.model.Advice;
 import io.github.tomascabralh.wiseoldai.model.EquipmentState;
 import io.github.tomascabralh.wiseoldai.model.InventoryItem;
 import io.github.tomascabralh.wiseoldai.model.InventoryState;
@@ -10,6 +11,8 @@ import io.github.tomascabralh.wiseoldai.model.LocationState;
 import io.github.tomascabralh.wiseoldai.model.Metadata;
 import io.github.tomascabralh.wiseoldai.model.PlayerState;
 import io.github.tomascabralh.wiseoldai.model.SkillEntry;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -68,6 +71,7 @@ public class WiseOldAiPlugin extends Plugin
 	private Path stateDir;
 	private long lastWriteMs;
 	private long lastChangeMs;
+	private long lastAdviceMtime;
 
 	@Provides
 	WiseOldAiConfig provideConfig(ConfigManager configManager)
@@ -156,6 +160,50 @@ public class WiseOldAiPlugin extends Plugin
 		if (panel != null)
 		{
 			panel.update(true, local.getName(), lastChangeMs, updatedAt.size(), stateDir.toString());
+		}
+
+		refreshAdvice();
+	}
+
+	/** Pick up advice.json (written by the MCP client) and show it, re-reading only on change. */
+	private void refreshAdvice()
+	{
+		if (panel == null || stateDir == null)
+		{
+			return;
+		}
+		Path file = stateDir.resolve("advice.json");
+		try
+		{
+			if (!Files.exists(file))
+			{
+				return;
+			}
+			long mtime = Files.getLastModifiedTime(file).toMillis();
+			if (mtime == lastAdviceMtime)
+			{
+				return;
+			}
+			lastAdviceMtime = mtime;
+
+			Advice advice = gson.fromJson(new String(Files.readAllBytes(file), StandardCharsets.UTF_8), Advice.class);
+			if (advice != null && advice.body != null)
+			{
+				long created = 0L;
+				try
+				{
+					created = Instant.parse(advice.createdAt).toEpochMilli();
+				}
+				catch (Exception ignored)
+				{
+					// Leave created at 0 if the timestamp is missing/unparseable.
+				}
+				panel.setAdvice(advice.title, advice.body, created);
+			}
+		}
+		catch (Exception ignored)
+		{
+			// Advice is best-effort; never disrupt the game thread.
 		}
 	}
 
