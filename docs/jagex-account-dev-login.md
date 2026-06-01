@@ -19,37 +19,23 @@ To run the dev build with your Jagex account you must supply those same variable
 If you have an old non-Jagex account, just `gradle run` and type its
 username/password. No environment setup needed. This is the easiest dev loop.
 
-## Option B — reuse your Jagex Launcher session
+## Option B — use your Jagex Launcher session
 
-This passes the credentials your already-running, launcher-authenticated RuneLite
-received into the dev build. **Only do this for your own account on your own
-machine** — these are live session tokens.
+Serve the credentials the Jagex Launcher issues to the dev build. The repo ships
+a helper for this:
 
-1. Open the **Jagex Launcher** and launch the official **RuneLite**; log in.
-2. With that client running, extract its `JX_*` variables and launch the dev
-   build in the same shell:
+```bash
+cd plugins/wise-old-ai-runelite
+./scripts/run-with-jagex.sh
+```
 
-   ```bash
-   cd plugins/wise-old-ai-runelite
-   for pid in $(pgrep -if runelite); do
-     v=$(ps eww -p "$pid" 2>/dev/null | tr ' ' '\n' | grep -E '^JX_[A-Z_]+=')
-     if echo "$v" | grep -q JX_SESSION_ID; then
-       while IFS= read -r line; do export "$line"; done <<< "$v"
-       break
-     fi
-   done
-   [ -n "$JX_SESSION_ID" ] && gradle run --no-daemon --console=plain \
-     || echo "No JX_ vars readable — see note below."
-   ```
+It uses a saved credentials file if you have one, otherwise borrows the session
+from a running, launcher-authenticated RuneLite, then launches the dev build
+already logged into your account (exporting to `~/.wise-old-ai/state/`).
 
-3. The dev client opens already logged into your Jagex account and starts
-   exporting to `~/.wise-old-ai/state/`.
-
-> **macOS note:** reading another process's environment can be blocked for
-> notarized apps. If the script prints *"No JX_ vars readable"*, this route isn't
-> available on your machine — use Option A, or paste the five `JX_*` values into
-> your run configuration manually. The tokens are short-lived; re-extract when
-> they expire.
+The full explanation of how the launcher serves these credentials, how to save
+them for repeatable runs, the IDE run-configuration approach, and the macOS
+caveat is in **[serving-jagex-credentials.md](serving-jagex-credentials.md)**.
 
 ## Verifying the export
 

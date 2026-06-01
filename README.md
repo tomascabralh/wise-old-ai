@@ -75,7 +75,13 @@ Log in to a character and it writes to `~/.wise-old-ai/state/` every game tick
 distribution.
 
 > Using a **Jagex account**? The dev client's login screen only accepts legacy
-> accounts — see [`docs/jagex-account-dev-login.md`](docs/jagex-account-dev-login.md).
+> accounts. Serve your launcher session to the dev build with the helper:
+> ```bash
+> ./scripts/run-with-jagex.sh
+> ```
+> See [`docs/jagex-account-dev-login.md`](docs/jagex-account-dev-login.md) and
+> [`docs/serving-jagex-credentials.md`](docs/serving-jagex-credentials.md) for how
+> the launcher serves credentials, saving them for repeatable runs, and the macOS caveat.
 
 ### 3. Connect Claude Desktop
 See [`docs/claude-desktop-setup.md`](docs/claude-desktop-setup.md). In short, add

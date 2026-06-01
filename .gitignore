@@ -13,3 +13,6 @@ build/
 
 # Local state (never commit a real account's exported data)
 .wise-old-ai/
+
+# Jagex session tokens — never commit (see docs/serving-jagex-credentials.md)
+*jx-credentials*
