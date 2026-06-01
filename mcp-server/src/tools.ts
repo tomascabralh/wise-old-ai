@@ -6,6 +6,9 @@ import {
   InventoryStateSchema,
   EquipmentStateSchema,
   LocationStateSchema,
+  QuestsStateSchema,
+  DiariesStateSchema,
+  ActivitiesStateSchema,
   AdviceSchema,
 } from "@wise-old-ai/schemas";
 
@@ -72,6 +75,50 @@ export const tools: Record<string, Tool> = {
     run: async () => {
       const r = await readSlice("location", LocationStateSchema);
       return text(r.ok ? JSON.stringify(r.data, null, 2) : r.error);
+    },
+  },
+  get_quests: {
+    description: "Quest progress: quest points, how many are completed, what's in progress, and what hasn't been started.",
+    run: async () => {
+      const r = await readSlice("quests", QuestsStateSchema);
+      if (!r.ok) return text(r.error);
+      const entries = Object.entries(r.data.quests);
+      const inProgress = entries.filter(([, s]) => s === "IN_PROGRESS").map(([n]) => n);
+      const notStarted = entries.filter(([, s]) => s === "NOT_STARTED").map(([n]) => n);
+      const finished = entries.length - inProgress.length - notStarted.length;
+      const cap = (xs: string[]) => xs.slice(0, 25).join(", ") + (xs.length > 25 ? `, …(+${xs.length - 25})` : "");
+      return text(
+        `Quest points: ${r.data.questPoints}\n` +
+        `Completed: ${finished} / ${entries.length}\n` +
+        `In progress (${inProgress.length}): ${inProgress.length ? cap(inProgress) : "none"}\n` +
+        `Not started (${notStarted.length}): ${notStarted.length ? cap(notStarted) : "none"}`,
+      );
+    },
+  },
+  get_diaries: {
+    description: "Achievement diary completion per area and tier (easy/medium/hard/elite).",
+    run: async () => {
+      const r = await readSlice("diaries", DiariesStateSchema);
+      if (!r.ok) return text(r.error);
+      let done = 0;
+      const lines = Object.entries(r.data).map(([area, t]) => {
+        const tiers = (["easy", "medium", "hard", "elite"] as const).filter((k) => t[k]);
+        done += tiers.length;
+        return `${area}: ${tiers.length ? tiers.join(", ") : "none"}`;
+      });
+      return text(`Diary tiers complete: ${done} / ${Object.keys(r.data).length * 4}\n${lines.join("\n")}`);
+    },
+  },
+  get_current_activity: {
+    description: "The player's current activity — currently the Slayer task (amount remaining, points, streak).",
+    run: async () => {
+      const r = await readSlice("activities", ActivitiesStateSchema);
+      if (!r.ok) return text(r.error);
+      const s = r.data.slayer;
+      const task = s.taskAmountRemaining > 0
+        ? `${s.taskAmountRemaining} remaining${s.bossTask ? " (boss task)" : ""}`
+        : "no active task";
+      return text(`Slayer task: ${task}\nSlayer points: ${s.points}, streak: ${s.streak}\n(Note: the task's monster name isn't tracked yet.)`);
     },
   },
   push_advice: {

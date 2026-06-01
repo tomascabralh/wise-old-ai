@@ -48,6 +48,31 @@ describe("tools", () => {
     expect(out.content[0].text).toContain("Abyssal whip");
   });
 
+  it("get_quests summarizes counts and quest points", async () => {
+    await write("quests.json", {
+      questPoints: 290,
+      quests: { "Cook's Assistant": "FINISHED", "Dragon Slayer II": "IN_PROGRESS", "Sins of the Father": "NOT_STARTED" },
+    });
+    const out = (await tools.get_quests.run()).content[0].text;
+    expect(out).toContain("Quest points: 290");
+    expect(out).toContain("Completed: 1 / 3");
+    expect(out).toContain("Dragon Slayer II");
+  });
+
+  it("get_diaries reports completed tiers", async () => {
+    await write("diaries.json", { ardougne: { easy: true, medium: true, hard: false, elite: false } });
+    const out = (await tools.get_diaries.run()).content[0].text;
+    expect(out).toContain("ardougne: easy, medium");
+    expect(out).toContain("2 / 4");
+  });
+
+  it("get_current_activity reports the slayer task", async () => {
+    await write("activities.json", { slayer: { taskAmountRemaining: 87, points: 1500, streak: 120, bossTask: false } });
+    const out = (await tools.get_current_activity.run()).content[0].text;
+    expect(out).toContain("87 remaining");
+    expect(out).toContain("streak: 120");
+  });
+
   it("push_advice writes advice.json and get_advice reads it back", async () => {
     await tools.push_advice.run({ body: "Train Slayer next", title: "Next goal" });
     const raw = JSON.parse(await readFile(join(dir, "advice.json"), "utf8"));

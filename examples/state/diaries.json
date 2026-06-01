@@ -1,0 +1,14 @@
+{
+  "ardougne": { "easy": true, "medium": true, "hard": true, "elite": false },
+  "desert": { "easy": true, "medium": true, "hard": false, "elite": false },
+  "falador": { "easy": true, "medium": true, "hard": true, "elite": true },
+  "fremennik": { "easy": true, "medium": true, "hard": true, "elite": false },
+  "kandarin": { "easy": true, "medium": true, "hard": true, "elite": false },
+  "karamja": { "easy": true, "medium": true, "hard": true, "elite": true },
+  "kourend": { "easy": true, "medium": true, "hard": false, "elite": false },
+  "lumbridge": { "easy": true, "medium": true, "hard": true, "elite": false },
+  "morytania": { "easy": true, "medium": true, "hard": true, "elite": false },
+  "varrock": { "easy": true, "medium": true, "hard": true, "elite": true },
+  "western": { "easy": true, "medium": true, "hard": false, "elite": false },
+  "wilderness": { "easy": true, "medium": true, "hard": false, "elite": false }
+}

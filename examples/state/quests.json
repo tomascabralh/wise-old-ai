@@ -1,0 +1,11 @@
+{
+  "questPoints": 290,
+  "quests": {
+    "Cook's Assistant": "FINISHED",
+    "Dragon Slayer I": "FINISHED",
+    "Monkey Madness II": "FINISHED",
+    "Dragon Slayer II": "IN_PROGRESS",
+    "Song of the Elves": "NOT_STARTED",
+    "Sins of the Father": "NOT_STARTED"
+  }
+}

@@ -54,6 +54,33 @@ export const LocationStateSchema = z.object({
   regionId: z.number().int(),
 });
 
+/** Quest progress. `quests` maps quest name -> state. */
+export const QuestStateEnum = z.enum(["NOT_STARTED", "IN_PROGRESS", "FINISHED"]);
+export const QuestsStateSchema = z.object({
+  questPoints: z.number().int(),
+  quests: z.record(z.string(), QuestStateEnum),
+});
+
+/** One achievement-diary area's four tiers. */
+export const DiaryTiersSchema = z.object({
+  easy: z.boolean(),
+  medium: z.boolean(),
+  hard: z.boolean(),
+  elite: z.boolean(),
+});
+/** Map of area name (e.g. "ardougne") -> tier completion. */
+export const DiariesStateSchema = z.record(z.string(), DiaryTiersSchema);
+
+/** Current activity. For now this is the Slayer task (the monster name isn't tracked yet). */
+export const ActivitiesStateSchema = z.object({
+  slayer: z.object({
+    taskAmountRemaining: z.number().int(),
+    points: z.number().int(),
+    streak: z.number().int(),
+    bossTask: z.boolean(),
+  }),
+});
+
 /**
  * A piece of advice posted by the MCP client (e.g. Claude) for display on the
  * in-game panel. Written by the server, read by the plugin — the reverse channel.
@@ -77,5 +104,8 @@ export type InventoryItem = z.infer<typeof InventoryItemSchema>;
 export type InventoryState = z.infer<typeof InventoryStateSchema>;
 export type EquipmentState = z.infer<typeof EquipmentStateSchema>;
 export type LocationState = z.infer<typeof LocationStateSchema>;
+export type QuestsState = z.infer<typeof QuestsStateSchema>;
+export type DiariesState = z.infer<typeof DiariesStateSchema>;
+export type ActivitiesState = z.infer<typeof ActivitiesStateSchema>;
 export type Advice = z.infer<typeof AdviceSchema>;
 export type Metadata = z.infer<typeof MetadataSchema>;

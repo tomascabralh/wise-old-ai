@@ -6,6 +6,9 @@ import {
   EquipmentStateSchema,
   InventoryStateSchema,
   AdviceSchema,
+  QuestsStateSchema,
+  DiariesStateSchema,
+  ActivitiesStateSchema,
 } from "./index";
 
 describe("schemas", () => {
@@ -45,6 +48,14 @@ describe("schemas", () => {
       amulet: null, ring: null, gloves: null, boots: null, ammo: null,
     };
     expect(EquipmentStateSchema.parse(eq).weapon?.name).toBe("Abyssal whip");
+  });
+
+  it("accepts quests, diaries, and activities", () => {
+    expect(QuestsStateSchema.parse({ questPoints: 290, quests: { "Cook's Assistant": "FINISHED" } }).questPoints).toBe(290);
+    expect(() => QuestsStateSchema.parse({ questPoints: 1, quests: { X: "DONE" } })).toThrow();
+    const d = DiariesStateSchema.parse({ ardougne: { easy: true, medium: true, hard: false, elite: false } });
+    expect(d.ardougne.easy).toBe(true);
+    expect(ActivitiesStateSchema.parse({ slayer: { taskAmountRemaining: 42, points: 1000, streak: 50, bossTask: false } }).slayer.taskAmountRemaining).toBe(42);
   });
 
   it("accepts advice with and without a title, rejects empty", () => {

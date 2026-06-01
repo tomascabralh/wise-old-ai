@@ -3,13 +3,16 @@ package io.github.tomascabralh.wiseoldai;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Provides;
+import io.github.tomascabralh.wiseoldai.model.ActivitiesState;
 import io.github.tomascabralh.wiseoldai.model.Advice;
+import io.github.tomascabralh.wiseoldai.model.DiaryTiers;
 import io.github.tomascabralh.wiseoldai.model.EquipmentState;
 import io.github.tomascabralh.wiseoldai.model.InventoryItem;
 import io.github.tomascabralh.wiseoldai.model.InventoryState;
 import io.github.tomascabralh.wiseoldai.model.LocationState;
 import io.github.tomascabralh.wiseoldai.model.Metadata;
 import io.github.tomascabralh.wiseoldai.model.PlayerState;
+import io.github.tomascabralh.wiseoldai.model.QuestsState;
 import io.github.tomascabralh.wiseoldai.model.SkillEntry;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,7 +30,10 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.Player;
+import net.runelite.api.Quest;
 import net.runelite.api.Skill;
+import net.runelite.api.VarPlayer;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -150,6 +156,9 @@ public class WiseOldAiPlugin extends Plugin
 		changed |= exportSlice("inventory", buildInventory());
 		changed |= exportSlice("equipment", buildEquipment());
 		changed |= exportSlice("location", buildLocation(local));
+		changed |= exportSlice("quests", buildQuests());
+		changed |= exportSlice("diaries", buildDiaries());
+		changed |= exportSlice("activities", buildActivities());
 
 		if (changed)
 		{
@@ -327,6 +336,62 @@ public class WiseOldAiPlugin extends Plugin
 			loc.regionId = wp.getRegionID();
 		}
 		return loc;
+	}
+
+	private QuestsState buildQuests()
+	{
+		QuestsState q = new QuestsState();
+		q.questPoints = client.getVarpValue(VarPlayer.QUEST_POINTS);
+		for (Quest quest : Quest.values())
+		{
+			try
+			{
+				q.quests.put(quest.getName(), quest.getState(client).name());
+			}
+			catch (Exception ignored)
+			{
+				// A quest whose varbits aren't loaded yet is simply skipped this tick.
+			}
+		}
+		return q;
+	}
+
+	private Map<String, DiaryTiers> buildDiaries()
+	{
+		Map<String, DiaryTiers> d = new LinkedHashMap<>();
+		addDiary(d, "ardougne", Varbits.DIARY_ARDOUGNE_EASY, Varbits.DIARY_ARDOUGNE_MEDIUM, Varbits.DIARY_ARDOUGNE_HARD, Varbits.DIARY_ARDOUGNE_ELITE);
+		addDiary(d, "desert", Varbits.DIARY_DESERT_EASY, Varbits.DIARY_DESERT_MEDIUM, Varbits.DIARY_DESERT_HARD, Varbits.DIARY_DESERT_ELITE);
+		addDiary(d, "falador", Varbits.DIARY_FALADOR_EASY, Varbits.DIARY_FALADOR_MEDIUM, Varbits.DIARY_FALADOR_HARD, Varbits.DIARY_FALADOR_ELITE);
+		addDiary(d, "fremennik", Varbits.DIARY_FREMENNIK_EASY, Varbits.DIARY_FREMENNIK_MEDIUM, Varbits.DIARY_FREMENNIK_HARD, Varbits.DIARY_FREMENNIK_ELITE);
+		addDiary(d, "kandarin", Varbits.DIARY_KANDARIN_EASY, Varbits.DIARY_KANDARIN_MEDIUM, Varbits.DIARY_KANDARIN_HARD, Varbits.DIARY_KANDARIN_ELITE);
+		addDiary(d, "karamja", Varbits.DIARY_KARAMJA_EASY, Varbits.DIARY_KARAMJA_MEDIUM, Varbits.DIARY_KARAMJA_HARD, Varbits.DIARY_KARAMJA_ELITE);
+		addDiary(d, "kourend", Varbits.DIARY_KOUREND_EASY, Varbits.DIARY_KOUREND_MEDIUM, Varbits.DIARY_KOUREND_HARD, Varbits.DIARY_KOUREND_ELITE);
+		addDiary(d, "lumbridge", Varbits.DIARY_LUMBRIDGE_EASY, Varbits.DIARY_LUMBRIDGE_MEDIUM, Varbits.DIARY_LUMBRIDGE_HARD, Varbits.DIARY_LUMBRIDGE_ELITE);
+		addDiary(d, "morytania", Varbits.DIARY_MORYTANIA_EASY, Varbits.DIARY_MORYTANIA_MEDIUM, Varbits.DIARY_MORYTANIA_HARD, Varbits.DIARY_MORYTANIA_ELITE);
+		addDiary(d, "varrock", Varbits.DIARY_VARROCK_EASY, Varbits.DIARY_VARROCK_MEDIUM, Varbits.DIARY_VARROCK_HARD, Varbits.DIARY_VARROCK_ELITE);
+		addDiary(d, "western", Varbits.DIARY_WESTERN_EASY, Varbits.DIARY_WESTERN_MEDIUM, Varbits.DIARY_WESTERN_HARD, Varbits.DIARY_WESTERN_ELITE);
+		addDiary(d, "wilderness", Varbits.DIARY_WILDERNESS_EASY, Varbits.DIARY_WILDERNESS_MEDIUM, Varbits.DIARY_WILDERNESS_HARD, Varbits.DIARY_WILDERNESS_ELITE);
+		return d;
+	}
+
+	private void addDiary(Map<String, DiaryTiers> map, String area, int easy, int medium, int hard, int elite)
+	{
+		DiaryTiers t = new DiaryTiers();
+		t.easy = client.getVarbitValue(easy) > 0;
+		t.medium = client.getVarbitValue(medium) > 0;
+		t.hard = client.getVarbitValue(hard) > 0;
+		t.elite = client.getVarbitValue(elite) > 0;
+		map.put(area, t);
+	}
+
+	private ActivitiesState buildActivities()
+	{
+		ActivitiesState a = new ActivitiesState();
+		a.slayer.taskAmountRemaining = client.getVarpValue(VarPlayer.SLAYER_TASK_SIZE);
+		a.slayer.points = client.getVarbitValue(Varbits.SLAYER_POINTS);
+		a.slayer.streak = client.getVarbitValue(Varbits.SLAYER_TASK_STREAK);
+		a.slayer.bossTask = client.getVarbitValue(Varbits.SLAYER_TASK_BOSS) > 0;
+		return a;
 	}
 
 	private Metadata buildMetadata()

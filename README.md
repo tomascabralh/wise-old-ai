@@ -52,6 +52,9 @@ sends, so this stays advisory, never automation.
 | `get_inventory` | inventory items (`{id, name, quantity}`) |
 | `get_equipment` | worn gear by slot |
 | `get_location` | world position (x, y, plane, region) |
+| `get_quests` | quest points, completed/total, in-progress, not-started |
+| `get_diaries` | achievement diary completion per area & tier |
+| `get_current_activity` | current Slayer task (amount, points, streak) |
 | `push_advice` | post advice (`{body, title?}`) to the in-game panel |
 | `get_advice` | read the advice currently shown in-game |
 
@@ -122,8 +125,8 @@ independently. The plugin only writes a slice when its content actually changes.
 
 - **Milestone 1 (done):** player, skills, inventory, equipment, location + the
   seven tools above.
-- **Milestone 2:** quests, diaries, activities (`get_quests`, `get_diaries`,
-  `get_current_activity`).
+- **Milestone 2 (done):** quests, diaries, activities (`get_quests`,
+  `get_diaries`, `get_current_activity`).
 - **Milestone 3:** bank support + valuation, progression analysis.
 - **Milestone 4:** screenshots + multimodal coaching.
 - **Advice channel (done):** `push_advice` / `get_advice` surface the client's
