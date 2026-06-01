@@ -22,6 +22,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     testImplementation 'junit:junit:4.13.2'
+
+    // Dev-runner: the RuneLite client must be on the test runtime classpath so
+    // `gradle run` can launch the live client with this plugin loaded.
+    testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
+    testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
 }
 
 group = 'io.github.tomascabralh'
@@ -40,4 +45,14 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Test).configureEach {
     useJUnit()
+}
+
+// Launch RuneLite with the Wise Old AI plugin side-loaded, for local development.
+// Usage: `gradle run`  (opens the live client; log in to start exporting state).
+tasks.register('run', JavaExec) {
+    group = 'application'
+    description = 'Launch RuneLite with the Wise Old AI plugin loaded.'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.tomascabralh.wiseoldai.WiseOldAiPluginLauncher'
+    jvmArgs = ['-ea']
 }

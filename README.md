@@ -65,12 +65,14 @@ Requires JDK 11 and Gradle.
 cd plugins/wise-old-ai-runelite && gradle build
 # -> build/libs/wise-old-ai-runelite-0.1.0.jar, and JUnit tests run
 ```
-The plugin compiles against the RuneLite API and is structured for the
-[RuneLite Plugin Hub](https://github.com/runelite/plugin-hub). Running it inside
-the live client uses RuneLite's external-plugin developer workflow — see
-[`docs/claude-desktop-setup.md`](docs/claude-desktop-setup.md) for the current
-state and next steps. Once enabled and logged in, it writes to
-`~/.wise-old-ai/state/`.
+Then launch the live RuneLite client with the plugin side-loaded:
+```bash
+gradle run        # opens RuneLite; the plugin is already loaded
+```
+Log in to a character and it writes to `~/.wise-old-ai/state/` every game tick
+(only when data changes). The plugin is also structured for the
+[RuneLite Plugin Hub](https://github.com/runelite/plugin-hub) for eventual
+distribution.
 
 ### 3. Connect Claude Desktop
 See [`docs/claude-desktop-setup.md`](docs/claude-desktop-setup.md). In short, add

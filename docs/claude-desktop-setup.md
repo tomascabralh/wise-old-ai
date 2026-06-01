@@ -54,17 +54,23 @@ mid-game account in `examples/state/`.
 
 ## 2. Export live state from RuneLite
 
-The plugin in `plugins/wise-old-ai-runelite/` compiles against the RuneLite API
-and is structured for the [Plugin Hub](https://github.com/runelite/plugin-hub).
-Running it inside the live client today uses RuneLite's **external-plugin
-developer workflow** (run a RuneLite dev build with this plugin on the
-classpath). Packaging a one-command standalone dev-runner and a Plugin Hub
-submission are tracked as follow-ups after Milestone 1.
+Launch the live RuneLite client with the plugin side-loaded:
 
-Once the plugin is enabled and a character is logged in, it writes to
-`~/.wise-old-ai/state/` every game tick (only when data changes). Remove the
-`WISE_OLD_AI_STATE_DIR` override above so the server reads that live directory
-(its default is `~/.wise-old-ai/state`).
+```bash
+cd plugins/wise-old-ai-runelite
+gradle run
+```
+
+This opens a normal RuneLite client with the Wise Old AI plugin already loaded
+(it uses RuneLite's `ExternalPluginManager.loadBuiltin` dev path; the launcher is
+`WiseOldAiPluginLauncher` in the plugin's test sources). Log in to a character and
+it writes to `~/.wise-old-ai/state/` every game tick — but only when a slice's
+data actually changes.
+
+Then remove the `WISE_OLD_AI_STATE_DIR` override above so the server reads that
+live directory (its default is `~/.wise-old-ai/state`). For eventual one-click
+distribution, the plugin is also structured for the
+[Plugin Hub](https://github.com/runelite/plugin-hub).
 
 ## Troubleshooting
 
