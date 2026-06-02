@@ -9,8 +9,11 @@ import {
   QuestsStateSchema,
   DiariesStateSchema,
   ActivitiesStateSchema,
+  BankStateSchema,
   AdviceSchema,
 } from "@wise-old-ai/schemas";
+
+const gp = (n: number) => `${n.toLocaleString("en-US")} gp`;
 
 export type ToolResult = { content: { type: "text"; text: string }[] };
 const text = (s: string): ToolResult => ({ content: [{ type: "text", text: s }] });
@@ -125,6 +128,28 @@ export const tools: Record<string, Tool> = {
         `Slayer task: ${monster}${where} — ${s.taskAmountRemaining} remaining${s.bossTask ? " (boss task)" : ""}\n` +
         `Slayer points: ${s.points}, streak: ${s.streak}${note}`,
       );
+    },
+  },
+  get_bank_value: {
+    description: "Total Grand Exchange value of the player's bank. Requires the bank to have been opened in-game.",
+    run: async () => {
+      const r = await readSlice("bank", BankStateSchema);
+      if (!r.ok) return text(`${r.error} (Open your bank in-game once so it can be read.)`);
+      return text(`Bank value: ${gp(r.data.geValue)} across ${r.data.items.length} item stacks.`);
+    },
+  },
+  get_bank: {
+    description: "The player's bank: total GE value, item count, and the most valuable items. Requires the bank to have been opened in-game.",
+    run: async () => {
+      const r = await readSlice("bank", BankStateSchema);
+      if (!r.ok) return text(`${r.error} (Open your bank in-game once so it can be read.)`);
+      const TOP = 40;
+      const ranked = [...r.data.items].sort((a, b) => b.gePrice * b.quantity - a.gePrice * a.quantity);
+      const lines = ranked.slice(0, TOP).map(
+        (i) => `${i.name} x${i.quantity.toLocaleString("en-US")} (~${gp(i.gePrice * i.quantity)})`,
+      );
+      const more = ranked.length > TOP ? `\n…and ${ranked.length - TOP} more, lower-value stacks` : "";
+      return text(`Bank value: ${gp(r.data.geValue)} across ${r.data.items.length} item stacks.\nMost valuable:\n${lines.join("\n")}${more}`);
     },
   },
   push_advice: {

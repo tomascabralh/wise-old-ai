@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Provides;
 import io.github.tomascabralh.wiseoldai.model.ActivitiesState;
 import io.github.tomascabralh.wiseoldai.model.Advice;
+import io.github.tomascabralh.wiseoldai.model.BankItem;
+import io.github.tomascabralh.wiseoldai.model.BankState;
 import io.github.tomascabralh.wiseoldai.model.DiaryTiers;
 import io.github.tomascabralh.wiseoldai.model.EquipmentState;
 import io.github.tomascabralh.wiseoldai.model.InventoryItem;
@@ -162,6 +164,13 @@ public class WiseOldAiPlugin extends Plugin
 		changed |= exportSlice("quests", buildQuests());
 		changed |= exportSlice("diaries", buildDiaries());
 		changed |= exportSlice("activities", buildActivities());
+
+		// Bank is only readable once the player has opened it this session.
+		ItemContainer bank = client.getItemContainer(InventoryID.BANK);
+		if (bank != null)
+		{
+			changed |= exportSlice("bank", buildBank(bank));
+		}
 
 		if (changed)
 		{
@@ -385,6 +394,25 @@ public class WiseOldAiPlugin extends Plugin
 		t.hard = client.getVarbitValue(hard) > 0;
 		t.elite = client.getVarbitValue(elite) > 0;
 		map.put(area, t);
+	}
+
+	private BankState buildBank(ItemContainer container)
+	{
+		BankState b = new BankState();
+		long total = 0;
+		for (Item item : container.getItems())
+		{
+			if (item.getId() < 0 || item.getQuantity() <= 0)
+			{
+				continue;
+			}
+			int price = itemManager.getItemPrice(item.getId());
+			String name = itemManager.getItemComposition(item.getId()).getName();
+			b.items.add(new BankItem(item.getId(), name, item.getQuantity(), price));
+			total += (long) price * item.getQuantity();
+		}
+		b.geValue = total;
+		return b;
 	}
 
 	private ActivitiesState buildActivities()

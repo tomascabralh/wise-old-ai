@@ -54,7 +54,9 @@ sends, so this stays advisory, never automation.
 | `get_location` | world position (x, y, plane, region) |
 | `get_quests` | quest points, completed/total, in-progress, not-started |
 | `get_diaries` | achievement diary completion per area & tier |
-| `get_current_activity` | current Slayer task (amount, points, streak) |
+| `get_current_activity` | current Slayer task (monster, amount, points, streak) |
+| `get_bank_value` | total GE value of the bank |
+| `get_bank` | bank value, item count, and most valuable items |
 | `push_advice` | post advice (`{body, title?}`) to the in-game panel |
 | `get_advice` | read the advice currently shown in-game |
 
@@ -127,7 +129,7 @@ independently. The plugin only writes a slice when its content actually changes.
   seven tools above.
 - **Milestone 2 (done):** quests, diaries, activities (`get_quests`,
   `get_diaries`, `get_current_activity`).
-- **Milestone 3:** bank support + valuation, progression analysis.
+- **Milestone 3 (done):** bank support + GE valuation (`get_bank`, `get_bank_value`).
 - **Milestone 4:** screenshots + multimodal coaching.
 - **Advice channel (done):** `push_advice` / `get_advice` surface the client's
   advice on the in-game panel.

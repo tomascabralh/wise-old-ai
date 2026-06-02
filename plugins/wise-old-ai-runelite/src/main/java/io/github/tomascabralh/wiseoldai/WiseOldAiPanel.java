@@ -181,7 +181,7 @@ class WiseOldAiPanel extends PluginPanel
 
 			account.setText("Account: " + (username == null || username.isEmpty() ? "—" : username));
 			lastExport.setText("Last export: " + (lastExportMs > 0 ? TIME.format(new Date(lastExportMs)) : "—"));
-			slices.setText("Files written: " + sliceCount + " / 8");
+			slices.setText("Files written: " + sliceCount + " / 9");
 			dir.setText("<html><div style='width:190px'>Folder: " + this.stateDir + "</div></html>");
 
 			boolean haveDir = !this.stateDir.isEmpty();

@@ -71,6 +71,19 @@ export const DiaryTiersSchema = z.object({
 /** Map of area name (e.g. "ardougne") -> tier completion. */
 export const DiariesStateSchema = z.record(z.string(), DiaryTiersSchema);
 
+/** A bank entry: like an inventory item plus its unit GE price (0 for untradeables). */
+export const BankItemSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  quantity: z.number().int().min(1),
+  gePrice: z.number().int().min(0),
+});
+/** Bank contents + total GE value. Only populated once the player opens their bank. */
+export const BankStateSchema = z.object({
+  geValue: z.number().int().min(0),
+  items: z.array(BankItemSchema),
+});
+
 /** Current activity. For now this is the Slayer task (the monster name isn't tracked yet). */
 export const ActivitiesStateSchema = z.object({
   slayer: z.object({
@@ -111,5 +124,7 @@ export type LocationState = z.infer<typeof LocationStateSchema>;
 export type QuestsState = z.infer<typeof QuestsStateSchema>;
 export type DiariesState = z.infer<typeof DiariesStateSchema>;
 export type ActivitiesState = z.infer<typeof ActivitiesStateSchema>;
+export type BankItem = z.infer<typeof BankItemSchema>;
+export type BankState = z.infer<typeof BankStateSchema>;
 export type Advice = z.infer<typeof AdviceSchema>;
 export type Metadata = z.infer<typeof MetadataSchema>;

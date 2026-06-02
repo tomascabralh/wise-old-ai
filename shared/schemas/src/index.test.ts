@@ -9,6 +9,7 @@ import {
   QuestsStateSchema,
   DiariesStateSchema,
   ActivitiesStateSchema,
+  BankStateSchema,
 } from "./index";
 
 describe("schemas", () => {
@@ -56,6 +57,12 @@ describe("schemas", () => {
     const d = DiariesStateSchema.parse({ ardougne: { easy: true, medium: true, hard: false, elite: false } });
     expect(d.ardougne.easy).toBe(true);
     expect(ActivitiesStateSchema.parse({ slayer: { taskAmountRemaining: 42, points: 1000, streak: 50, bossTask: false } }).slayer.taskAmountRemaining).toBe(42);
+  });
+
+  it("accepts a bank state and rejects negative value", () => {
+    const ok = { geValue: 1500000, items: [{ id: 4151, name: "Abyssal whip", quantity: 1, gePrice: 1500000 }] };
+    expect(BankStateSchema.parse(ok).geValue).toBe(1500000);
+    expect(() => BankStateSchema.parse({ geValue: -1, items: [] })).toThrow();
   });
 
   it("accepts advice with and without a title, rejects empty", () => {
