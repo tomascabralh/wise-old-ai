@@ -26,7 +26,9 @@ contract defined once in [`shared/schemas`](shared/schemas) as Zod schemas.
 
 The plugin adds a **sidebar panel** (the owl icon) showing export status — whether
 it's exporting, for which account, when it last changed, how many state files are
-written, and buttons to open or copy the state folder. It also has an **Advice**
+written, and buttons to open or copy the state folder. A **"What the advisor sees"**
+line summarizes coverage at a glance (bank value, current Slayer task, quest &
+diary progress — and flags when the bank still needs opening). It also has an **Advice**
 section: when your MCP client (e.g. Claude) calls `push_advice`, the text appears
 here in-game. The model still runs in the client — the panel just displays what it
 sends, so this stays advisory, never automation.

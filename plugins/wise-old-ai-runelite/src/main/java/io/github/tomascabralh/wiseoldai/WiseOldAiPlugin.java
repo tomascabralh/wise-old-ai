@@ -132,6 +132,7 @@ public class WiseOldAiPlugin extends Plugin
 		{
 			panel.update(false, null, lastChangeMs, updatedAt.size(),
 				stateDir == null ? "" : stateDir.toString());
+			panel.setCaptured(null);
 		}
 	}
 
@@ -161,15 +162,20 @@ public class WiseOldAiPlugin extends Plugin
 		changed |= exportSlice("inventory", buildInventory());
 		changed |= exportSlice("equipment", buildEquipment());
 		changed |= exportSlice("location", buildLocation(local));
-		changed |= exportSlice("quests", buildQuests());
-		changed |= exportSlice("diaries", buildDiaries());
-		changed |= exportSlice("activities", buildActivities());
+
+		QuestsState quests = buildQuests();
+		Map<String, DiaryTiers> diaries = buildDiaries();
+		ActivitiesState activities = buildActivities();
+		changed |= exportSlice("quests", quests);
+		changed |= exportSlice("diaries", diaries);
+		changed |= exportSlice("activities", activities);
 
 		// Bank is only readable once the player has opened it this session.
-		ItemContainer bank = client.getItemContainer(InventoryID.BANK);
+		ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
+		BankState bank = bankContainer != null ? buildBank(bankContainer) : null;
 		if (bank != null)
 		{
-			changed |= exportSlice("bank", buildBank(bank));
+			changed |= exportSlice("bank", bank);
 		}
 
 		if (changed)
@@ -181,9 +187,39 @@ public class WiseOldAiPlugin extends Plugin
 		if (panel != null)
 		{
 			panel.update(true, local.getName(), lastChangeMs, updatedAt.size(), stateDir.toString());
+			panel.setCaptured(capturedSummary(quests, diaries, activities, bank));
 		}
 
 		refreshAdvice();
+	}
+
+	/** Compact "what the advisor sees" summary for the panel. */
+	private String capturedSummary(QuestsState q, Map<String, DiaryTiers> d, ActivitiesState a, BankState bank)
+	{
+		long questsDone = q.quests.values().stream().filter("FINISHED"::equals).count();
+		int diaryTiers = 0;
+		for (DiaryTiers t : d.values())
+		{
+			if (t.easy) { diaryTiers++; }
+			if (t.medium) { diaryTiers++; }
+			if (t.hard) { diaryTiers++; }
+			if (t.elite) { diaryTiers++; }
+		}
+		String slayer = a.slayer.taskAmountRemaining > 0
+			? (a.slayer.taskName != null ? a.slayer.taskName : "task") + " x" + a.slayer.taskAmountRemaining
+			: "none";
+		String bankStr = bank != null ? formatGp(bank.geValue) : "open bank in-game";
+		return "Bank: " + bankStr
+			+ "\nSlayer: " + slayer
+			+ "\nQuests " + questsDone + "/" + q.quests.size() + " · Diaries " + diaryTiers + "/48";
+	}
+
+	private static String formatGp(long v)
+	{
+		if (v >= 1_000_000_000L) { return String.format("%.2fB", v / 1e9); }
+		if (v >= 1_000_000L) { return String.format("%.1fM", v / 1e6); }
+		if (v >= 1_000L) { return String.format("%.0fK", v / 1e3); }
+		return Long.toString(v);
 	}
 
 	/** Pick up advice.json (written by the MCP client) and show it, re-reading only on change. */
