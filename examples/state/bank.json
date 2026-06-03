@@ -1,0 +1,11 @@
+{
+  "geValue": 47430000,
+  "items": [
+    { "id": 11834, "name": "Bandos tassets", "quantity": 1, "gePrice": 24000000 },
+    { "id": 11832, "name": "Bandos chestplate", "quantity": 1, "gePrice": 19500000 },
+    { "id": 4151, "name": "Abyssal whip", "quantity": 1, "gePrice": 1500000 },
+    { "id": 560, "name": "Death rune", "quantity": 10000, "gePrice": 160 },
+    { "id": 12695, "name": "Super combat potion(4)", "quantity": 50, "gePrice": 12000 },
+    { "id": 995, "name": "Coins", "quantity": 230000, "gePrice": 1 }
+  ]
+}

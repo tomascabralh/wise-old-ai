@@ -81,6 +81,27 @@ describe("tools", () => {
     expect(out).toMatch(/unknown monster/i);
   });
 
+  it("get_bank_value and get_bank summarize value and top items", async () => {
+    await write("bank.json", {
+      geValue: 21500000,
+      items: [
+        { id: 11832, name: "Bandos chestplate", quantity: 1, gePrice: 20000000 },
+        { id: 995, name: "Coins", quantity: 1500000, gePrice: 1 },
+        { id: 314, name: "Feather", quantity: 5000, gePrice: 2 },
+      ],
+    });
+    const value = (await tools.get_bank_value.run()).content[0].text;
+    expect(value).toContain("21,500,000 gp");
+    const bank = (await tools.get_bank.run()).content[0].text;
+    expect(bank).toContain("Bandos chestplate");
+    expect(bank.indexOf("Bandos chestplate")).toBeLessThan(bank.indexOf("Feather")); // sorted by value
+  });
+
+  it("get_bank explains when the bank hasn't been opened", async () => {
+    const out = (await tools.get_bank.run()).content[0].text;
+    expect(out).toMatch(/open your bank/i);
+  });
+
   it("push_advice writes advice.json and get_advice reads it back", async () => {
     await tools.push_advice.run({ body: "Train Slayer next", title: "Next goal" });
     const raw = JSON.parse(await readFile(join(dir, "advice.json"), "utf8"));

@@ -41,6 +41,7 @@ class WiseOldAiPanel extends PluginPanel
 	private final JButton openButton = new JButton("Open state folder");
 	private final JButton copyButton = new JButton("Copy folder path");
 
+	private final JLabel captured = new JLabel();
 	private final JLabel adviceTitle = new JLabel();
 	private final JTextArea adviceBody = new JTextArea();
 	private final JLabel adviceTime = new JLabel();
@@ -70,6 +71,15 @@ class WiseOldAiPanel extends PluginPanel
 			l.setAlignmentX(Component.LEFT_ALIGNMENT);
 			l.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
 		}
+
+		JLabel capturedHeader = new JLabel("What the advisor sees");
+		capturedHeader.setFont(capturedHeader.getFont().deriveFont(Font.BOLD, 11f));
+		capturedHeader.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		capturedHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+		capturedHeader.setBorder(BorderFactory.createEmptyBorder(8, 0, 2, 0));
+
+		captured.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		captured.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 		dir.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		dir.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -116,6 +126,8 @@ class WiseOldAiPanel extends PluginPanel
 		body.add(slices);
 		body.add(dir);
 		body.add(buttons);
+		body.add(capturedHeader);
+		body.add(captured);
 		body.add(sep);
 		body.add(adviceHeader);
 		body.add(adviceTitle);
@@ -125,7 +137,20 @@ class WiseOldAiPanel extends PluginPanel
 		add(body, BorderLayout.NORTH);
 
 		update(false, null, 0L, 0, "");
+		setCaptured(null);
 		clearAdvice();
+	}
+
+	/**
+	 * Show a compact summary of what the advisor can currently read (bank value, slayer
+	 * task, quest/diary progress). Pass null to show the logged-out placeholder.
+	 */
+	void setCaptured(String summary)
+	{
+		javax.swing.SwingUtilities.invokeLater(() ->
+			captured.setText("<html><div style='width:190px'>"
+				+ (summary == null || summary.isEmpty() ? "—" : summary.replace("\n", "<br>"))
+				+ "</div></html>"));
 	}
 
 	/** Show advice posted by the MCP client. Marshals onto the EDT. */
@@ -181,7 +206,7 @@ class WiseOldAiPanel extends PluginPanel
 
 			account.setText("Account: " + (username == null || username.isEmpty() ? "—" : username));
 			lastExport.setText("Last export: " + (lastExportMs > 0 ? TIME.format(new Date(lastExportMs)) : "—"));
-			slices.setText("Files written: " + sliceCount + " / 8");
+			slices.setText("Files written: " + sliceCount + " / 9");
 			dir.setText("<html><div style='width:190px'>Folder: " + this.stateDir + "</div></html>");
 
 			boolean haveDir = !this.stateDir.isEmpty();

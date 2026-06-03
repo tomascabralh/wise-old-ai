@@ -26,7 +26,9 @@ contract defined once in [`shared/schemas`](shared/schemas) as Zod schemas.
 
 The plugin adds a **sidebar panel** (the owl icon) showing export status — whether
 it's exporting, for which account, when it last changed, how many state files are
-written, and buttons to open or copy the state folder. It also has an **Advice**
+written, and buttons to open or copy the state folder. A **"What the advisor sees"**
+line summarizes coverage at a glance (bank value, current Slayer task, quest &
+diary progress — and flags when the bank still needs opening). It also has an **Advice**
 section: when your MCP client (e.g. Claude) calls `push_advice`, the text appears
 here in-game. The model still runs in the client — the panel just displays what it
 sends, so this stays advisory, never automation.
@@ -54,7 +56,9 @@ sends, so this stays advisory, never automation.
 | `get_location` | world position (x, y, plane, region) |
 | `get_quests` | quest points, completed/total, in-progress, not-started |
 | `get_diaries` | achievement diary completion per area & tier |
-| `get_current_activity` | current Slayer task (amount, points, streak) |
+| `get_current_activity` | current Slayer task (monster, amount, points, streak) |
+| `get_bank_value` | total GE value of the bank |
+| `get_bank` | bank value, item count, and most valuable items |
 | `push_advice` | post advice (`{body, title?}`) to the in-game panel |
 | `get_advice` | read the advice currently shown in-game |
 
@@ -127,7 +131,7 @@ independently. The plugin only writes a slice when its content actually changes.
   seven tools above.
 - **Milestone 2 (done):** quests, diaries, activities (`get_quests`,
   `get_diaries`, `get_current_activity`).
-- **Milestone 3:** bank support + valuation, progression analysis.
+- **Milestone 3 (done):** bank support + GE valuation (`get_bank`, `get_bank_value`).
 - **Milestone 4:** screenshots + multimodal coaching.
 - **Advice channel (done):** `push_advice` / `get_advice` surface the client's
   advice on the in-game panel.
