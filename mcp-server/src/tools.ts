@@ -1,5 +1,6 @@
 import { z, type ZodTypeAny } from "zod";
 import { readSlice, writeSlice } from "./stateStore.js";
+import { computeContext, formatContext } from "./context.js";
 import {
   PlayerStateSchema,
   SkillsStateSchema,
@@ -150,6 +151,29 @@ export const tools: Record<string, Tool> = {
       );
       const more = ranked.length > TOP ? `\n…and ${ranked.length - TOP} more, lower-value stacks` : "";
       return text(`Bank value: ${gp(r.data.geValue)} across ${r.data.items.length} item stacks.\nMost valuable:\n${lines.join("\n")}${more}`);
+    },
+  },
+  get_account_context: {
+    description:
+      "An experienced player's read of the account: stage, combat readiness for popular bosses, and prioritized recommended goals. Synthesizes skills, quests, diaries, and the current Slayer task — call this first for 'what should I do?' questions.",
+    run: async () => {
+      const [player, skills, quests, diaries, activities, bank] = await Promise.all([
+        readSlice("player", PlayerStateSchema),
+        readSlice("skills", SkillsStateSchema),
+        readSlice("quests", QuestsStateSchema),
+        readSlice("diaries", DiariesStateSchema),
+        readSlice("activities", ActivitiesStateSchema),
+        readSlice("bank", BankStateSchema),
+      ]);
+      const ctx = computeContext({
+        player: player.ok ? player.data : undefined,
+        skills: skills.ok ? skills.data : undefined,
+        quests: quests.ok ? quests.data : undefined,
+        diaries: diaries.ok ? diaries.data : undefined,
+        activities: activities.ok ? activities.data : undefined,
+        bank: bank.ok ? bank.data : undefined,
+      });
+      return text(formatContext(ctx));
     },
   },
   push_advice: {
