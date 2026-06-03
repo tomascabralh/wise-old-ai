@@ -124,10 +124,10 @@ class WiseOldAiPanel extends PluginPanel
 		body.add(account);
 		body.add(lastExport);
 		body.add(slices);
-		body.add(capturedHeader);
-		body.add(captured);
 		body.add(dir);
 		body.add(buttons);
+		body.add(capturedHeader);
+		body.add(captured);
 		body.add(sep);
 		body.add(adviceHeader);
 		body.add(adviceTitle);
