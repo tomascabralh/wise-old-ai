@@ -59,6 +59,7 @@ sends, so this stays advisory, never automation.
 | `get_current_activity` | current Slayer task (monster, amount, points, streak) |
 | `get_bank_value` | total GE value of the bank |
 | `get_bank` | bank value, item count, and most valuable items |
+| `get_account_context` | derived read: account stage, boss readiness, recommended goals |
 | `push_advice` | post advice (`{body, title?}`) to the in-game panel |
 | `get_advice` | read the advice currently shown in-game |
 
@@ -135,8 +136,8 @@ independently. The plugin only writes a slice when its content actually changes.
 - **Milestone 4:** screenshots + multimodal coaching.
 - **Advice channel (done):** `push_advice` / `get_advice` surface the client's
   advice on the in-game panel.
-- **Context engine:** a derived layer (account stage, combat readiness,
-  recommended goals) on top of raw state.
+- **Context engine (done):** a derived layer (account stage, combat readiness,
+  recommended goals) on top of raw state, via `get_account_context`.
 
 See [`docs/plans/`](docs/plans) for the design and implementation plan.
 
