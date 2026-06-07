@@ -157,13 +157,14 @@ export const tools: Record<string, Tool> = {
     description:
       "An experienced player's read of the account: stage, combat readiness for popular bosses, and prioritized recommended goals. Synthesizes skills, quests, diaries, and the current Slayer task — call this first for 'what should I do?' questions.",
     run: async () => {
-      const [player, skills, quests, diaries, activities, bank] = await Promise.all([
+      const [player, skills, quests, diaries, activities, bank, equipment] = await Promise.all([
         readSlice("player", PlayerStateSchema),
         readSlice("skills", SkillsStateSchema),
         readSlice("quests", QuestsStateSchema),
         readSlice("diaries", DiariesStateSchema),
         readSlice("activities", ActivitiesStateSchema),
         readSlice("bank", BankStateSchema),
+        readSlice("equipment", EquipmentStateSchema),
       ]);
       const ctx = computeContext({
         player: player.ok ? player.data : undefined,
@@ -172,6 +173,7 @@ export const tools: Record<string, Tool> = {
         diaries: diaries.ok ? diaries.data : undefined,
         activities: activities.ok ? activities.data : undefined,
         bank: bank.ok ? bank.data : undefined,
+        equipment: equipment.ok ? equipment.data : undefined,
       });
       return text(formatContext(ctx));
     },
