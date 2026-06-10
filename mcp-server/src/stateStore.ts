@@ -1,7 +1,8 @@
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import type { ZodType } from "zod";
+import { z, type ZodTypeAny } from "zod";
+import { SCHEMA_VERSION } from "@wise-old-ai/schemas";
 
 /** Directory the RuneLite plugin writes state files into. Overridable for tests. */
 export const stateDir = (): string =>
@@ -16,10 +17,10 @@ export type ReadResult<T> =
  * unparseable JSON, or schema mismatch all return a friendly { ok: false } so
  * tools can tell the user the plugin probably isn't running yet.
  */
-export async function readSlice<T>(
+export async function readSlice<S extends ZodTypeAny>(
   slice: string,
-  schema: ZodType<T>,
-): Promise<ReadResult<T>> {
+  schema: S,
+): Promise<ReadResult<z.output<S>>> {
   let raw: string;
   try {
     raw = await readFile(join(stateDir(), `${slice}.json`), "utf8");
@@ -34,6 +35,28 @@ export async function readSlice<T>(
   } catch (e) {
     return { ok: false, error: `Could not read ${slice}.json: ${(e as Error).message}` };
   }
+}
+
+/** Lenient read of just the version field — tolerates a future schema's extra fields. */
+const VersionOnlySchema = z.object({ schemaVersion: z.number().int() });
+
+/**
+ * If the on-disk state was written by a different schema version than this server
+ * expects, return a human-readable warning; otherwise null. Missing/unreadable
+ * metadata returns null (the plugin simply isn't running yet — readSlice already
+ * gives a friendly per-tool message for that case).
+ */
+export async function schemaVersionWarning(): Promise<string | null> {
+  const r = await readSlice("metadata", VersionOnlySchema);
+  if (!r.ok) return null;
+  if (r.data.schemaVersion !== SCHEMA_VERSION) {
+    return (
+      `State files were written with schema version ${r.data.schemaVersion}, ` +
+      `but this server expects ${SCHEMA_VERSION}. Update the Wise Old AI plugin and ` +
+      `MCP server to matching versions — some tools may misbehave until you do.`
+    );
+  }
+  return null;
 }
 
 /** Atomically write a slice (tmp file + rename) so a reader never sees partial JSON. */
