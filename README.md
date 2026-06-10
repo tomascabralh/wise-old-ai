@@ -1,9 +1,16 @@
 # Wise Old AI
 
+[![CI](https://github.com/tomascabralh/wise-old-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/tomascabralh/wise-old-ai/actions/workflows/ci.yml)
+
 An open-source, local-first **AI advisor** for Old School RuneScape. A RuneLite
 plugin exports your account state to local JSON files; an MCP server lets Claude
 Desktop (and any MCP client) read that state and give you personalized
 progression, PvM, skilling, and questing advice.
+
+> **Status: maintenance mode.** All planned milestones (1–3), the advice channel,
+> and the context engine are complete and the project is feature-complete. It's
+> not abandoned — it works and is documented — but active development has paused.
+> See the [roadmap](#roadmap) for what a future revival would build next.
 
 > ### Advisor, not a bot
 > Wise Old AI only **reads** account state. It does **not** control your mouse or

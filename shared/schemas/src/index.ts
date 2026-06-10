@@ -108,9 +108,16 @@ export const AdviceSchema = z.object({
   createdAt: z.string(), // ISO-8601
 });
 
+/**
+ * The state-file schema version. Bump when the on-disk contract changes in a
+ * breaking way: the plugin stamps it into metadata.json and the MCP server warns
+ * on drift, so a mismatched plugin/server pair is obvious instead of cryptic.
+ */
+export const SCHEMA_VERSION = 1 as const;
+
 /** Written every export so consumers can report data staleness. */
 export const MetadataSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(SCHEMA_VERSION),
   updatedAt: z.record(z.string(), z.string()), // slice name -> ISO-8601 timestamp
 });
 
