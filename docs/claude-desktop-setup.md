@@ -3,6 +3,38 @@
 This guide wires the Wise Old AI MCP server into Claude Desktop so it can read
 your exported OSRS account state.
 
+There are two routes:
+
+- **[Easiest: no build](#easiest-no-build-via-npx)**: install the plugin from the
+  RuneLite Plugin Hub and run the server with `npx`. Recommended for players.
+- **[From source](#from-source)**: clone and build both halves. For development or
+  if you want to run unreleased changes.
+
+## Easiest: no build (via npx)
+
+**Prerequisites:** [Claude Desktop](https://claude.ai/download), Node.js 18+
+(`node -v`), and RuneLite with the **Wise Old AI** plugin installed from the
+Plugin Hub (RuneLite → wrench/Configuration → Plugin Hub → search "Wise Old AI").
+
+Add this to your Claude Desktop config (paths below), then restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "wise-old-ai": {
+      "command": "npx",
+      "args": ["-y", "wise-old-ai-mcp"]
+    }
+  }
+}
+```
+
+That's it — `npx` fetches and runs the published server, which reads the state the
+plugin writes to `~/.wise-old-ai/state/`. Skip to
+[§2 Export live state](#2-export-live-state-from-runelite) to start the plugin.
+
+## From source
+
 ## Prerequisites
 
 - [Claude Desktop](https://claude.ai/download)

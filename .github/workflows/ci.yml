@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # TypeScript: shared schemas must be built before the server (file: dependency).
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: shared/schemas — install, build, test
+        working-directory: shared/schemas
+        run: |
+          npm install
+          npm run build
+          npm test
+      - name: mcp-server — install, build, test
+        working-directory: mcp-server
+        run: |
+          npm install
+          npm run build
+          npm test
+
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "11"
+      - name: RuneLite plugin — build & test
+        working-directory: plugins/wise-old-ai-runelite
+        run: ./gradlew build --no-daemon
